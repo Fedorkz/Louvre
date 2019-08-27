@@ -1,9 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-apply plugin: 'com.github.dcendents.android-maven'
 
-group='com.github.Fedorkz'
+group='com.github.fedorkz'
 
 android {
     compileSdkVersion project.ext.compileSdkVersion
