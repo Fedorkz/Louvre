@@ -179,7 +179,7 @@ public class GalleryFragment extends Fragment implements MediaLoader.Callbacks, 
                 int size = getResources().getDimensionPixelSize(R.dimen.gallery_item_size);
                 int width = mRecyclerView.getMeasuredWidth();
                 int columnCount = width / (size + spacing);
-                mLayoutManager.setSpanCount(columnCount);
+                mLayoutManager.setSpanCount(Math.max(columnCount, 1));
                 return false;
             }
         });
