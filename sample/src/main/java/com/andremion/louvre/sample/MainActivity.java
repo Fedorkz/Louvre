@@ -19,16 +19,17 @@ package com.andremion.louvre.sample;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.View;
 import android.view.ViewTreeObserver;
 
 import com.andremion.louvre.home.GalleryActivity;
 import com.andremion.louvre.util.ItemOffsetDecoration;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
