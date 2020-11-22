@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
@@ -25,7 +26,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "com.google.android.material:material:1.1.0"
+    implementation "com.google.android.material:material:1.2.1"
     implementation "androidx.recyclerview:recyclerview:1.1.0"
     implementation "com.github.andremion:counterfab:$counterFabVersion"
     implementation "com.github.bumptech.glide:glide:$glideVersion"
@@ -34,6 +35,11 @@ dependencies {
     testImplementation "junit:junit:$junitVersion"
 
     androidTestImplementation "androidx.test.espresso:espresso-core:3.1.0"
+    implementation "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }
 
 //apply from: 'https://raw.githubusercontent.com/andremion/JCenter/master/deploy.gradle'
