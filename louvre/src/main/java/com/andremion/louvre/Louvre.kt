@@ -13,109 +13,104 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.andremion.louvre
 
-package com.andremion.louvre;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
-import androidx.annotation.StringDef;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AppCompatDelegate;
-
-import com.andremion.louvre.home.GalleryActivity;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.List;
+import android.app.Activity
+import android.net.Uri
+import androidx.annotation.IntRange
+import androidx.annotation.StringDef
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.fragment.app.Fragment
+import com.andremion.louvre.home.GalleryActivity
+import java.lang.annotation.Retention
+import java.lang.annotation.RetentionPolicy
 
 /**
  * A small customizable image picker. Useful to handle an image pick action built-in
  */
-public class Louvre {
+class Louvre {
+    companion object {
+        const val IMAGE_TYPE_BMP = "image/bmp"
+        const val IMAGE_TYPE_JPEG = "image/jpeg"
+        const val IMAGE_TYPE_PNG = "image/png"
+        const val IMAGE_TYPE_VIDEO = "VIDEO/*"
+        @JvmField
+        val IMAGE_TYPES = arrayOf(IMAGE_TYPE_BMP, IMAGE_TYPE_JPEG, IMAGE_TYPE_PNG, IMAGE_TYPE_VIDEO)
+        @JvmStatic
+        fun init(activity: Activity): Louvre {
+            return Louvre(activity)
+        }
 
-    static {
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+        @JvmStatic
+        fun init(fragment: Fragment): Louvre {
+            return Louvre(fragment)
+        }
+
+        init {
+            AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+        }
     }
 
-    public static final String IMAGE_TYPE_BMP = "image/bmp";
-    public static final String IMAGE_TYPE_JPEG = "image/jpeg";
-    public static final String IMAGE_TYPE_PNG = "image/png";
-    public static final String[] IMAGE_TYPES = {IMAGE_TYPE_BMP, IMAGE_TYPE_JPEG, IMAGE_TYPE_PNG};
-
-    @StringDef({IMAGE_TYPE_BMP, IMAGE_TYPE_JPEG, IMAGE_TYPE_PNG})
+    @StringDef(IMAGE_TYPE_BMP, IMAGE_TYPE_JPEG, IMAGE_TYPE_PNG, IMAGE_TYPE_VIDEO)
     @Retention(RetentionPolicy.SOURCE)
-    @interface MediaType {
+    internal annotation class MediaType
+
+    private var mActivity: Activity? = null
+    private var mFragment: Fragment? = null
+    private var mRequestCode: Int
+    private var mMaxSelection = 0
+    private var mSelection: List<Uri>? = null
+    private var mMediaTypeFilter: Array<String> = arrayOf(*IMAGE_TYPES)
+
+    private constructor(activity: Activity) {
+        mActivity = activity
+        mRequestCode = -1
     }
 
-    private Activity mActivity;
-    private Fragment mFragment;
-    private int mRequestCode;
-    private int mMaxSelection;
-    private List<Uri> mSelection;
-    private String[] mMediaTypeFilter;
-
-    private Louvre(@NonNull Activity activity) {
-        mActivity = activity;
-        mRequestCode = -1;
-    }
-
-    private Louvre(@NonNull Fragment fragment) {
-        mFragment = fragment;
-        mRequestCode = -1;
-    }
-
-    public static Louvre init(@NonNull Activity activity) {
-        return new Louvre(activity);
-    }
-
-    public static Louvre init(@NonNull Fragment fragment) {
-        return new Louvre(fragment);
+    private constructor(fragment: Fragment) {
+        mFragment = fragment
+        mRequestCode = -1
     }
 
     /**
-     * Set the request code to return on {@link Activity#onActivityResult(int, int, Intent)}
+     * Set the request code to return on [Activity.onActivityResult]
      */
-    public Louvre setRequestCode(int requestCode) {
-        mRequestCode = requestCode;
-        return this;
+    fun setRequestCode(requestCode: Int): Louvre {
+        mRequestCode = requestCode
+        return this
     }
 
     /**
      * Set the max images allowed to pick
      */
-    public Louvre setMaxSelection(@IntRange(from = 0) int maxSelection) {
-        mMaxSelection = maxSelection;
-        return this;
+    fun setMaxSelection(@IntRange(from = 0) maxSelection: Int): Louvre {
+        mMaxSelection = maxSelection
+        return this
     }
 
     /**
      * Set the current selected items
      */
-    public Louvre setSelection(@NonNull List<Uri> selection) {
-        mSelection = selection;
-        return this;
+    fun setSelection(selection: List<Uri>?): Louvre {
+        mSelection = selection
+        return this
     }
 
     /**
-     * Set the media type to filter the query with a combination of one of these types: {@link #IMAGE_TYPE_BMP}, {@link #IMAGE_TYPE_JPEG}, {@link #IMAGE_TYPE_PNG}
+     * Set the media type to filter the query with a combination of one of these types: [.IMAGE_TYPE_BMP], [.IMAGE_TYPE_JPEG], [.IMAGE_TYPE_PNG]
      */
-    public Louvre setMediaTypeFilter(@MediaType @NonNull String... mediaTypeFilter) {
-        mMediaTypeFilter = mediaTypeFilter;
-        return this;
+    fun setMediaTypeFilter(@MediaType vararg mediaTypeFilter: String): Louvre {
+        mMediaTypeFilter = mediaTypeFilter.toList().toTypedArray()
+
+        return this
     }
 
-    public void open() {
-        if (mRequestCode == -1) {
-            throw new IllegalArgumentException("You need to define a request code in setRequestCode(int) method");
-        }
+    fun open() {
+        require(mRequestCode != -1) { "You need to define a request code in setRequestCode(int) method" }
         if (mActivity != null) {
-            GalleryActivity.startActivity(mActivity, mRequestCode, mMaxSelection, mSelection, mMediaTypeFilter);
+            GalleryActivity.startActivity(mActivity!!, mRequestCode, mMaxSelection, mSelection, *mMediaTypeFilter)
         } else {
-            GalleryActivity.startActivity(mFragment, mRequestCode, mMaxSelection, mSelection, mMediaTypeFilter);
+            GalleryActivity.startActivity(mFragment!!, mRequestCode, mMaxSelection, mSelection, *mMediaTypeFilter)
         }
     }
-
 }

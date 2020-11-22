@@ -21,31 +21,29 @@ import android.provider.MediaStore
 /**
  * Helper class used by [MediaLoader]
  */
-internal object MediaQuery {
+internal object ImageMediaQuery {
     @JvmField
     val GALLERY_URI: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
     @JvmField
-    val VIDEO_GALLERY_URI: Uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-    @JvmField
     val IMAGE_PROJECTION = arrayOf(
-            MediaStore.MediaColumns._ID,
-            MediaStore.MediaColumns.BUCKET_ID,
-            MediaStore.MediaColumns.DISPLAY_NAME,
-            MediaStore.MediaColumns.DATA
+            MediaStore.Images.ImageColumns._ID,
+            MediaStore.Images.ImageColumns.BUCKET_ID,
+            MediaStore.Images.ImageColumns.DISPLAY_NAME,
+            MediaStore.Images.ImageColumns.DATA
     )
     @JvmField
     val ALL_IMAGE_PROJECTION = arrayOf(
-            MediaStore.MediaColumns._ID,
+            MediaStore.Images.ImageColumns._ID,
             MediaLoader.ALL_MEDIA_BUCKET_ID.toString() + " AS " + MediaStore.Images.ImageColumns.BUCKET_ID,
-            MediaStore.MediaColumns.DISPLAY_NAME,
-            MediaStore.MediaColumns.DATA
+            MediaStore.Images.ImageColumns.DISPLAY_NAME,
+            MediaStore.Images.ImageColumns.DATA
     )
     const val MEDIA_SORT_ORDER = MediaStore.Images.Media.DATE_TAKEN + " DESC"
     @JvmField
     val BUCKET_PROJECTION = arrayOf(
-            MediaStore.MediaColumns.BUCKET_ID,
-            MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
-            MediaStore.MediaColumns.DATA
+            MediaStore.Images.ImageColumns.BUCKET_ID,
+            MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
+            MediaStore.Images.ImageColumns.DATA
     )
 
     // The template for "WHERE" parameter is like:
@@ -58,5 +56,5 @@ internal object MediaQuery {
     //
     // *Hack pulled from https://android.googlesource.com/platform/packages/apps/Gallery2/+/android-4.4.2_r2/src/com/android/gallery3d/data/BucketHelper.java
     const val BUCKET_SELECTION = "1) GROUP BY (1"
-    const val BUCKET_SORT_ORDER = "MAX(" + MediaStore.Images.Media.DATE_MODIFIED + ") DESC"
+    const val BUCKET_SORT_ORDER = "MAX(" + MediaStore.Images.Media.DATE_TAKEN + ") DESC"
 }
