@@ -41,6 +41,7 @@ import com.bumptech.glide.request.RequestOptions;
 import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.net.URLConnection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -151,9 +152,21 @@ class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHolder> {
         }
     }
 
+    public static boolean isVideoFile(String path) {
+        String mimeType = URLConnection.guessContentTypeFromName(path);
+        return mimeType != null && mimeType.startsWith("video");
+    }
+
     @Override
     public void onBindViewHolder(@NonNull GalleryAdapter.ViewHolder holder, int position) {
         Uri data = getData(position);
+
+        boolean isVideo = isVideoFile(data.getPath());
+
+        holder.mVideoIcon.setVisibility(
+                isVideo ? View.VISIBLE : View.GONE
+        );
+
         String imageTransitionName = holder.itemView.getContext().getString(R.string.activity_gallery_image_transition, data.toString());
         String checkboxTransitionName = holder.itemView.getContext().getString(R.string.activity_gallery_checkbox_transition, data.toString());
         ViewCompat.setTransitionName(holder.mImageView, imageTransitionName);
@@ -294,9 +307,12 @@ class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHolder> {
 
         final ImageView mImageView;
 
+        final ImageView mVideoIcon;
+
         private ViewHolder(View itemView) {
             super(itemView);
             mImageView = itemView.findViewById(R.id.image);
+            mVideoIcon = itemView.findViewById(R.id.videoIcon);
         }
     }
 

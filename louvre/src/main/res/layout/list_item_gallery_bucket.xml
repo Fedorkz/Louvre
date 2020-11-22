@@ -14,6 +14,19 @@
         android:importantForAccessibility="no"
         android:scaleType="centerCrop" />
 
+    <ImageView
+        android:id="@+id/videoIcon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:cropToPadding="true"
+        android:src="@drawable/ic_play"
+        android:tint="#fff"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:padding="36dp"
+        android:scaleType="fitCenter"
+        tools:ignore="ContentDescription" />
+
     <TextView
         android:id="@+id/text"
         android:layout_width="match_parent"
