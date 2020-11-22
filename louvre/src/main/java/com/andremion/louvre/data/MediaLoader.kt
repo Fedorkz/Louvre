@@ -16,7 +16,6 @@
 package com.andremion.louvre.data
 
 import android.database.Cursor
-import android.database.CursorJoiner
 import android.database.MatrixCursor
 import android.database.MergeCursor
 import android.os.Bundle
@@ -31,12 +30,12 @@ import com.andremion.louvre.data.MediaQuery.ALL_IMAGE_PROJECTION
 import com.andremion.louvre.data.MediaQuery.BUCKET_PROJECTION
 import com.andremion.louvre.data.MediaQuery.BUCKET_SELECTION
 import com.andremion.louvre.data.MediaQuery.BUCKET_SORT_ORDER
+import com.andremion.louvre.data.MediaQuery.FILE_GALLERY_URI
 import com.andremion.louvre.data.MediaQuery.GALLERY_URI
 import com.andremion.louvre.data.MediaQuery.IMAGE_PROJECTION
 import com.andremion.louvre.data.MediaQuery.MEDIA_SORT_ORDER
 import com.andremion.louvre.data.MediaQuery.VIDEO_GALLERY_URI
 import java.lang.IllegalArgumentException
-import java.util.*
 
 /**
  * [Loader] for media and bucket data
@@ -54,16 +53,17 @@ class MediaLoader // 1 means all media type.
     private var mTypeFilter = "1"
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor?> {
+        val bucketIdCol = MediaStore.MediaColumns.BUCKET_ID
+        val mediaTypeCol = MediaStore.Files.FileColumns.MEDIA_TYPE
+
+        val mediaTypeValImage = MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+        val mediaTypeValVideo = MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
+
+        val bucketId = args?.getLong(BUCKET_ID)
+
         return when (id) {
             TIME_LOADER -> CursorLoader(mActivity!!,
                     GALLERY_URI,
-                    ALL_IMAGE_PROJECTION,
-                    mTypeFilter,
-                    null,
-                    MEDIA_SORT_ORDER)
-
-            VIDEO_TIME_LOADER -> CursorLoader(mActivity!!,
-                    VIDEO_GALLERY_URI,
                     ALL_IMAGE_PROJECTION,
                     mTypeFilter,
                     null,
@@ -81,19 +81,16 @@ class MediaLoader // 1 means all media type.
                     null,
                     BUCKET_SORT_ORDER)
 
-            MEDIA_LOADER -> CursorLoader(mActivity!!,
-                    GALLERY_URI,
-                    IMAGE_PROJECTION,
-                    String.format("%s=%s AND %s", MediaStore.Images.Media.BUCKET_ID, args!!.getLong(BUCKET_ID), mTypeFilter),
-                    null,
-                    MEDIA_SORT_ORDER)
-
-            VIDEO_MEDIA_LOADER -> CursorLoader(mActivity!!,
-                    VIDEO_GALLERY_URI,
-                    IMAGE_PROJECTION,
-                    String.format("%s=%s AND %s", MediaStore.Images.Media.BUCKET_ID, args!!.getLong(BUCKET_ID), mTypeFilter),
-                    null,
-                    MEDIA_SORT_ORDER)
+            MEDIA_LOADER -> {
+                CursorLoader(mActivity!!,
+                        FILE_GALLERY_URI,
+                        IMAGE_PROJECTION,
+                        "$bucketIdCol=$bucketId " +
+                                "AND ($mediaTypeCol=$mediaTypeValImage OR $mediaTypeCol=$mediaTypeValVideo) " +
+                                "AND $mTypeFilter",
+                        null,
+                        MEDIA_SORT_ORDER)
+            }
 
             else -> throw IllegalArgumentException("WRONG LOADER ID")
         }
@@ -104,32 +101,10 @@ class MediaLoader // 1 means all media type.
     private var videoBucketsCursor: Cursor? = null
     private var imageBucketsCursor: Cursor? = null
 
-    private var videoMediaCursor: Cursor? = null
-    private var imageMediaCursor: Cursor? = null
-
-    private var videoTimeCursor: Cursor? = null
-    private var imageTimeCursor: Cursor? = null
-
     private fun checkBuckets() {
         imageBucketsCursor?.let { images ->
             videoBucketsCursor?.let {videos ->
-                mCallbacks!!.onBucketLoadFinished(addAllMediaBucketItem(images, videos))
-            }
-        }
-    }
-
-    private fun checkTime() {
-        imageTimeCursor?.let { images ->
-            videoTimeCursor?.let {videos ->
-                mCallbacks!!.onMediaLoadFinished(MergeCursor(arrayOf(images, videos)))
-            }
-        }
-    }
-
-    private fun checkMedia() {
-        imageMediaCursor?.let { images ->
-            videoMediaCursor?.let { videos ->
-                mCallbacks!!.onMediaLoadFinished(MergeCursor(arrayOf(images, videos)))
+                mCallbacks?.onBucketLoadFinished(addAllMediaBucketItem(images, videos))
             }
         }
     }
@@ -149,24 +124,11 @@ class MediaLoader // 1 means all media type.
                     checkBuckets()
                 }
 
-                TIME_LOADER -> {
-                    imageTimeCursor = data
-                    checkTime()
-                }
+                TIME_LOADER -> mCallbacks?.onMediaLoadFinished(data)
 
-                VIDEO_TIME_LOADER -> {
-                    videoTimeCursor = data
-                    checkTime()
-                }
+                MEDIA_LOADER -> mCallbacks?.onMediaLoadFinished(data)
 
-                MEDIA_LOADER -> {
-                    imageMediaCursor = data
-                    checkMedia()
-                }
-
-                VIDEO_MEDIA_LOADER -> {
-                    videoMediaCursor = data
-                    checkMedia()
+                else -> {
                 }
             }
         }
@@ -218,21 +180,11 @@ class MediaLoader // 1 means all media type.
     fun loadByBucket(@IntRange(from = 0) bucketId: Long) {
         ensureActivityAttached()
         if (ALL_MEDIA_BUCKET_ID == bucketId) {
-            synchronized(lock){
-                imageTimeCursor = null
-                videoTimeCursor = null
-                mActivity!!.supportLoaderManager.restartLoader(TIME_LOADER, null, this)
-                mActivity!!.supportLoaderManager.restartLoader(VIDEO_TIME_LOADER, null, this)
-            }
+            mActivity?.supportLoaderManager?.restartLoader(TIME_LOADER, null, this)
         } else {
-            synchronized(lock) {
-                imageMediaCursor = null
-                videoMediaCursor = null
-                val args = Bundle()
-                args.putLong(BUCKET_ID, bucketId)
-                mActivity!!.supportLoaderManager.restartLoader(MEDIA_LOADER, args, this)
-                mActivity!!.supportLoaderManager.restartLoader(VIDEO_MEDIA_LOADER, args, this)
-            }
+            val args = Bundle()
+            args.putLong(BUCKET_ID, bucketId)
+            mActivity?.supportLoaderManager?.restartLoader(MEDIA_LOADER, args, this)
         }
     }
 
@@ -275,9 +227,7 @@ class MediaLoader // 1 means all media type.
         private const val BUCKET_LOADER = 1
         private const val MEDIA_LOADER = 2
 
-        private const val VIDEO_TIME_LOADER = 4
         private const val VIDEO_BUCKET_LOADER = 5
-        private const val VIDEO_MEDIA_LOADER = 6
 
         const val ALL_MEDIA_BUCKET_ID: Long = 0
         private const val BUCKET_ID = MediaStore.Video.Media.BUCKET_ID

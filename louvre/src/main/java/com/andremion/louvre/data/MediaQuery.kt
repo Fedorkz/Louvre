@@ -25,18 +25,21 @@ internal object MediaQuery {
     @JvmField
     val GALLERY_URI: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
     @JvmField
+    val FILE_GALLERY_URI: Uri = MediaStore.Files.getContentUri("external")
+    @JvmField
     val VIDEO_GALLERY_URI: Uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
     @JvmField
     val IMAGE_PROJECTION = arrayOf(
             MediaStore.MediaColumns._ID,
             MediaStore.MediaColumns.BUCKET_ID,
             MediaStore.MediaColumns.DISPLAY_NAME,
-            MediaStore.MediaColumns.DATA
+            MediaStore.MediaColumns.DATA,
+            MediaStore.Files.FileColumns.MEDIA_TYPE
     )
     @JvmField
     val ALL_IMAGE_PROJECTION = arrayOf(
             MediaStore.MediaColumns._ID,
-            MediaLoader.ALL_MEDIA_BUCKET_ID.toString() + " AS " + MediaStore.Images.ImageColumns.BUCKET_ID,
+            MediaLoader.ALL_MEDIA_BUCKET_ID.toString() + " AS " + MediaStore.MediaColumns.BUCKET_ID,
             MediaStore.MediaColumns.DISPLAY_NAME,
             MediaStore.MediaColumns.DATA
     )
