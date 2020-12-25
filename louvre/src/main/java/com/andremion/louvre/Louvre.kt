@@ -105,12 +105,13 @@ class Louvre {
         return this
     }
 
-    fun open() {
+    @JvmOverloads
+    fun open(includeVideo: Boolean = false) {
         require(mRequestCode != -1) { "You need to define a request code in setRequestCode(int) method" }
         if (mActivity != null) {
-            GalleryActivity.startActivity(mActivity!!, mRequestCode, mMaxSelection, mSelection, false, *mMediaTypeFilter)
+            GalleryActivity.startActivity(mActivity!!, mRequestCode, mMaxSelection, mSelection, includeVideo, *mMediaTypeFilter)
         } else {
-            GalleryActivity.startActivity(mFragment!!, mRequestCode, mMaxSelection, mSelection, false, *mMediaTypeFilter)
+            GalleryActivity.startActivity(mFragment!!, mRequestCode, mMaxSelection, mSelection, includeVideo, *mMediaTypeFilter)
         }
     }
 }
