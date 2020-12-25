@@ -19,9 +19,9 @@ import android.net.Uri
 import android.provider.MediaStore
 
 /**
- * Helper class used by [MediaLoader]
+ * Helper class used by [VideoAndImageMediaLoader]
  */
-internal object MediaQuery {
+internal object VideoAndImageMediaQuery {
     @JvmField
     val GALLERY_URI: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
     @JvmField
@@ -39,7 +39,7 @@ internal object MediaQuery {
     @JvmField
     val ALL_IMAGE_PROJECTION = arrayOf(
             MediaStore.MediaColumns._ID,
-            MediaLoader.ALL_MEDIA_BUCKET_ID.toString() + " AS " + MediaStore.MediaColumns.BUCKET_ID,
+            VideoAndImageMediaLoader.ALL_MEDIA_BUCKET_ID.toString() + " AS " + MediaStore.MediaColumns.BUCKET_ID,
             MediaStore.MediaColumns.DISPLAY_NAME,
             MediaStore.MediaColumns.DATA
     )

@@ -19,7 +19,7 @@ import android.net.Uri
 import android.provider.MediaStore
 
 /**
- * Helper class used by [MediaLoader]
+ * Helper class used by [VideoAndImageMediaLoader]
  */
 internal object ImageMediaQuery {
     @JvmField
@@ -34,7 +34,7 @@ internal object ImageMediaQuery {
     @JvmField
     val ALL_IMAGE_PROJECTION = arrayOf(
             MediaStore.Images.ImageColumns._ID,
-            MediaLoader.ALL_MEDIA_BUCKET_ID.toString() + " AS " + MediaStore.Images.ImageColumns.BUCKET_ID,
+            VideoAndImageMediaLoader.ALL_MEDIA_BUCKET_ID.toString() + " AS " + MediaStore.Images.ImageColumns.BUCKET_ID,
             MediaStore.Images.ImageColumns.DISPLAY_NAME,
             MediaStore.Images.ImageColumns.DATA
     )

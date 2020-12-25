@@ -47,6 +47,7 @@ public class GalleryActivity extends StoragePermissionActivity implements Galler
 
     private static final String EXTRA_MAX_SELECTION = GalleryActivity.class.getPackage().getName() + ".extra.MAX_SELECTION";
     private static final String EXTRA_MEDIA_TYPE_FILTER = GalleryActivity.class.getPackage().getName() + ".extra.MEDIA_TYPE_FILTER";
+    private static final String EXTRA_INCLUDE_VIDEO = GalleryActivity.class.getPackage().getName() + ".extra.INCLUDE_VIDEO";
     private static final String EXTRA_SELECTION = GalleryActivity.class.getPackage().getName() + ".extra.SELECTION";
     private static final int DEFAULT_MAX_SELECTION = 1;
     private static final String TITLE_STATE = "title_state";
@@ -64,8 +65,9 @@ public class GalleryActivity extends StoragePermissionActivity implements Galler
     public static void startActivity(@NonNull Activity activity, int requestCode,
                                      @IntRange(from = 0) int maxSelection,
                                      List<Uri> selection,
+                                     boolean includeVideo,
                                      String... mediaTypeFilter) {
-        Intent intent = buildIntent(activity, maxSelection, selection, mediaTypeFilter);
+        Intent intent = buildIntent(activity, maxSelection, selection, includeVideo, mediaTypeFilter);
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -81,13 +83,14 @@ public class GalleryActivity extends StoragePermissionActivity implements Galler
     public static void startActivity(@NonNull Fragment fragment, int requestCode,
                                      @IntRange(from = 0) int maxSelection,
                                      List<Uri> selection,
+                                     boolean includeVideo,
                                      String... mediaTypeFilter) {
-        Intent intent = buildIntent(fragment.getContext(), maxSelection, selection, mediaTypeFilter);
+        Intent intent = buildIntent(fragment.getContext(), maxSelection, selection, includeVideo, mediaTypeFilter);
         fragment.startActivityForResult(intent, requestCode);
     }
 
     @NonNull
-    private static Intent buildIntent(@NonNull Context context, @IntRange(from = 0) int maxSelection, List<Uri> selection, String[] mediaTypeFilter) {
+    private static Intent buildIntent(@NonNull Context context, @IntRange(from = 0) int maxSelection, List<Uri> selection, boolean includeVideo, String[] mediaTypeFilter) {
         Intent intent = new Intent(context, GalleryActivity.class);
         if (maxSelection > 0) {
             intent.putExtra(EXTRA_MAX_SELECTION, maxSelection);
@@ -98,6 +101,7 @@ public class GalleryActivity extends StoragePermissionActivity implements Galler
         if (mediaTypeFilter != null && mediaTypeFilter.length > 0) {
             intent.putExtra(EXTRA_MEDIA_TYPE_FILTER, mediaTypeFilter);
         }
+        intent.putExtra(EXTRA_INCLUDE_VIDEO, includeVideo);
         return intent;
     }
 
@@ -112,7 +116,13 @@ public class GalleryActivity extends StoragePermissionActivity implements Galler
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_gallery);
+        boolean includeVideo = getIntent().getBooleanExtra(EXTRA_INCLUDE_VIDEO, false);
+        if (includeVideo) {
+            setContentView(R.layout.with_video_activity_gallery);
+        } else {
+            setContentView(R.layout.activity_gallery);
+        }
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setupTransition();
@@ -211,10 +221,15 @@ public class GalleryActivity extends StoragePermissionActivity implements Galler
         if (getIntent().hasExtra(EXTRA_MEDIA_TYPE_FILTER)) {
             PreviewActivity.startActivity(this, PREVIEW_REQUEST_CODE, imageView, checkView, bucketId, position, mFragment.getSelection(),
                     getIntent().getIntExtra(EXTRA_MAX_SELECTION, DEFAULT_MAX_SELECTION),
+                    getIntent().getBooleanExtra(EXTRA_INCLUDE_VIDEO, false),
                     getIntent().getStringArrayExtra(EXTRA_MEDIA_TYPE_FILTER));
         } else {
-            PreviewActivity.startActivity(this, PREVIEW_REQUEST_CODE, imageView, checkView, bucketId, position, mFragment.getSelection(),
-                    getIntent().getIntExtra(EXTRA_MAX_SELECTION, DEFAULT_MAX_SELECTION));
+            PreviewActivity.startActivity(this, PREVIEW_REQUEST_CODE,
+                    imageView, checkView, bucketId, position,
+                    mFragment.getSelection(),
+                    getIntent().getIntExtra(EXTRA_MAX_SELECTION, DEFAULT_MAX_SELECTION),
+                    getIntent().getBooleanExtra(EXTRA_INCLUDE_VIDEO, false)
+                );
         }
     }
 

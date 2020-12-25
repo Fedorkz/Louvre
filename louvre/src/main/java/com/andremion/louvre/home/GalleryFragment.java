@@ -41,7 +41,9 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
 import com.andremion.louvre.R;
+import com.andremion.louvre.data.ImageMediaLoader;
 import com.andremion.louvre.data.MediaLoader;
+import com.andremion.louvre.data.VideoAndImageMediaLoader;
 import com.andremion.louvre.preview.PreviewActivity;
 import com.andremion.louvre.util.ItemOffsetDecoration;
 import com.andremion.louvre.util.transition.MediaSharedElementCallback;
@@ -65,7 +67,7 @@ public class GalleryFragment extends Fragment implements MediaLoader.Callbacks, 
         void onWillExceedMaxSelection();
     }
 
-    private final MediaLoader mMediaLoader;
+    private MediaLoader mMediaLoader;
     private final GalleryAdapter mAdapter;
     private View mEmptyView;
     private GridLayoutManager mLayoutManager;
@@ -73,8 +75,16 @@ public class GalleryFragment extends Fragment implements MediaLoader.Callbacks, 
     private Callbacks mCallbacks;
     private boolean mShouldHandleBackPressed;
 
+    public boolean includeVideo() {
+        return false;
+    }
+
     public GalleryFragment() {
-        mMediaLoader = new MediaLoader();
+        if (includeVideo())
+            mMediaLoader = new VideoAndImageMediaLoader();
+        else
+            mMediaLoader = new ImageMediaLoader();
+
         mAdapter = new GalleryAdapter();
         mAdapter.setCallbacks(this);
         setRetainInstance(true);

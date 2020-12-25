@@ -26,6 +26,9 @@ import android.os.Bundle;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.andremion.louvre.data.ImageMediaLoader;
+import com.andremion.louvre.data.VideoAndImageMediaLoader;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.ActivityOptionsCompat;
@@ -59,10 +62,11 @@ public class PreviewActivity extends AppCompatActivity implements MediaLoader.Ca
     private static final String EXTRA_SELECTION = PreviewActivity.class.getPackage().getName() + ".extra.SELECTION";
     private static final String EXTRA_MAX_SELECTION = PreviewActivity.class.getPackage().getName() + ".extra.MAX_SELECTION";
     private static final String EXTRA_MEDIA_TYPE_FILTER = PreviewActivity.class.getPackage().getName() + ".extra.MEDIA_TYPE_FILTER";
+    private static final String EXTRA_INCLUDE_VIDEO = PreviewActivity.class.getPackage().getName() + ".extra.INCLUDE_VIDEO";
 
     public static void startActivity(@NonNull Activity activity, int requestCode, @NonNull View imageView, @NonNull View checkView,
                                      @IntRange(from = 0) long bucketId, @IntRange(from = 0) int position,
-                                     List<Uri> selection, int maxSelection, String... mediaTypeFilter) {
+                                     List<Uri> selection, int maxSelection, boolean includeVideo, String... mediaTypeFilter) {
 
         Intent intent = new Intent(activity, PreviewActivity.class);
         intent.putExtra(EXTRA_BUCKET_ID, bucketId);
@@ -70,6 +74,7 @@ public class PreviewActivity extends AppCompatActivity implements MediaLoader.Ca
         intent.putExtra(EXTRA_SELECTION, new LinkedList<>(selection));
         intent.putExtra(EXTRA_MAX_SELECTION, maxSelection);
         intent.putExtra(EXTRA_MEDIA_TYPE_FILTER, mediaTypeFilter);
+        intent.putExtra(EXTRA_INCLUDE_VIDEO, includeVideo);
 
         Pair[] sharedElements = concatToSystemSharedElements(activity,
                 Pair.create(imageView, ViewCompat.getTransitionName(imageView)),
@@ -159,11 +164,19 @@ public class PreviewActivity extends AppCompatActivity implements MediaLoader.Ca
         mViewPager = (ViewPager) findViewById(R.id.view_pager);
         mViewPager.setAdapter(mAdapter);
 
-        mMediaLoader = new MediaLoader();
+        boolean includeVideo = getIntent().getBooleanExtra(EXTRA_INCLUDE_VIDEO, false);
+
+        if (includeVideo) {
+            mMediaLoader = new VideoAndImageMediaLoader();
+        } else {
+            mMediaLoader = new ImageMediaLoader();
+        }
+
         mMediaLoader.onAttach(this, this);
         if (getIntent().hasExtra(EXTRA_MEDIA_TYPE_FILTER)) {
             mMediaLoader.setMediaTypes(getIntent().getStringArrayExtra(EXTRA_MEDIA_TYPE_FILTER));
         }
+
 
         long bucketId = getIntent().getExtras().getLong(EXTRA_BUCKET_ID);
         mMediaLoader.loadByBucket(bucketId);
