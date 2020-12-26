@@ -26,9 +26,12 @@ import androidx.annotation.Nullable;
 import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -153,8 +156,23 @@ class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHolder> {
     }
 
     public static boolean isVideoFile(String path) {
-        String mimeType = URLConnection.guessContentTypeFromName(path);
+        String extension = getExtension(path);
+        String mimeType = TextUtils.isEmpty(extension)
+                ? URLConnection.guessContentTypeFromName(path)
+                : MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
         return mimeType != null && mimeType.startsWith("video");
+    }
+
+    private static String getExtension(String path) {
+        String extension = MimeTypeMap.getFileExtensionFromUrl(path);
+        if (!TextUtils.isEmpty(extension)) {
+            return extension;
+        }
+        if (path.contains(".")) {
+            return path.substring(path.lastIndexOf(".") + 1);
+        } else {
+            return "";
+        }
     }
 
     @Override

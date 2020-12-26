@@ -28,21 +28,24 @@ object AlbumQuery {
                 "_data IS NOT NULL AND ( $typeSelector ) ", null, bucketOrderBy
         ).use { cursor ->
             if (cursor != null && cursor.moveToFirst()) {
-                val columnBucketName = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)
+//                val columnBucketName = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)
                 val columnBucketId = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_ID)
                 val columnId = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
-                val columnData = cursor.getColumnIndexOrThrow("_data")
+//                val columnData = cursor.getColumnIndexOrThrow("_data")
 
                 do {
                     val bucketId = cursor.getString(columnBucketId)
-                    val bucketName = cursor.getString(columnBucketName)
-                    val data = cursor.getString(columnData)
                     val id = cursor.getString(columnId)
 
-                    if (!output.containsKey(bucketId)) {
-                        val count = getCount(context, contentUri, bucketId)
-                        val album = Album(bucketId, bucketName, count, data, id)
-                        output[bucketId] = album
+                    if (bucketId != null && id != null) {
+//                    val bucketName = cursor.getString(columnBucketName)
+//                    val data = cursor.getString(columnData)
+
+                        if (!output.containsKey(bucketId)) {
+//                        val count = getCount(context, contentUri, bucketId)
+                            val album = Album(id)
+                            output[bucketId] = album
+                        }
                     }
                 } while (cursor.moveToNext())
             }
@@ -67,11 +70,11 @@ object AlbumQuery {
     }
 
     data class Album(
-            val buckedId: String,
-            val bucketName: String,
-            val count: Int,
-            val data: String,
-            val fileId: String
+//            val buckedId: String,
+//            val bucketName: String,
+//            val count: Int,
+//            val data: String,
+            val fileId: String?
     )
 
     @JvmStatic
@@ -79,7 +82,7 @@ object AlbumQuery {
         val albums = get(context, includeVideo)
         return Bundle().apply {
             putStringArrayList(
-                    ARG_IDS, ArrayList(albums.map { it.fileId })
+                    ARG_IDS, ArrayList(albums.mapNotNull { it.fileId })
             )
         }
     }

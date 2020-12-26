@@ -66,7 +66,7 @@ class VideoAndImageMediaLoader // 1 means all media type.
             BUCKET_LOADER -> {
                 val ids = args?.getStringArrayList(ARG_IDS) ?: emptyList()
 
-                val idSelector = ids.map { _id ->
+                val idSelector = ids.mapNotNull { _id ->
                     "(${MediaStore.MediaColumns._ID} == $_id)"
                 }.joinToString(" OR ")
 
@@ -172,7 +172,7 @@ class VideoAndImageMediaLoader // 1 means all media type.
             val albums = AlbumQuery.get(mActivity!!, true)
             val args = Bundle().apply {
                 putStringArrayList(
-                        ARG_IDS, ArrayList(albums.map { it.fileId })
+                        ARG_IDS, ArrayList(albums.mapNotNull { it.fileId })
                 )
             }
             mActivity!!.supportLoaderManager.restartLoader(BUCKET_LOADER, args, this)
