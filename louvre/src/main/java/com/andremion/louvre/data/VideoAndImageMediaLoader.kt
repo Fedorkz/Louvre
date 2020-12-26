@@ -28,13 +28,11 @@ import androidx.loader.content.Loader
 import com.andremion.louvre.R
 import com.andremion.louvre.data.VideoAndImageMediaQuery.ALL_IMAGE_PROJECTION
 import com.andremion.louvre.data.VideoAndImageMediaQuery.BUCKET_PROJECTION
-import com.andremion.louvre.data.VideoAndImageMediaQuery.BUCKET_SELECTION
 import com.andremion.louvre.data.VideoAndImageMediaQuery.BUCKET_SORT_ORDER
 import com.andremion.louvre.data.VideoAndImageMediaQuery.FILE_GALLERY_URI
 import com.andremion.louvre.data.VideoAndImageMediaQuery.GALLERY_URI
 import com.andremion.louvre.data.VideoAndImageMediaQuery.IMAGE_PROJECTION
 import com.andremion.louvre.data.VideoAndImageMediaQuery.MEDIA_SORT_ORDER
-import com.andremion.louvre.data.VideoAndImageMediaQuery.VIDEO_GALLERY_URI
 import java.lang.IllegalArgumentException
 
 /**
@@ -48,6 +46,7 @@ class VideoAndImageMediaLoader // 1 means all media type.
     private var mTypeFilter = "1"
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor?> {
+
         val bucketIdCol = MediaStore.MediaColumns.BUCKET_ID
         val mediaTypeCol = MediaStore.Files.FileColumns.MEDIA_TYPE
 
@@ -64,17 +63,27 @@ class VideoAndImageMediaLoader // 1 means all media type.
                     null,
                     MEDIA_SORT_ORDER)
 
-            BUCKET_LOADER -> CursorLoader(mActivity!!,
-                    GALLERY_URI,
-                    BUCKET_PROJECTION, String.format("%s AND %s", mTypeFilter, BUCKET_SELECTION),
-                    null,
-                    BUCKET_SORT_ORDER)
+            BUCKET_LOADER -> {
+                val ids = args?.getStringArrayList(ARG_IDS) ?: emptyList()
 
-            VIDEO_BUCKET_LOADER -> CursorLoader(mActivity!!,
-                    VIDEO_GALLERY_URI,
-                    BUCKET_PROJECTION, String.format("%s AND %s", mTypeFilter, BUCKET_SELECTION),
-                    null,
-                    BUCKET_SORT_ORDER)
+                val idSelector = ids.map { _id ->
+                    "(${MediaStore.MediaColumns._ID} == $_id)"
+                }.joinToString(" OR ")
+
+                CursorLoader(mActivity!!,
+                        FILE_GALLERY_URI,
+                        BUCKET_PROJECTION,
+                        idSelector,
+                        null,
+                        BUCKET_SORT_ORDER
+                )
+            }
+
+//            VIDEO_BUCKET_LOADER -> CursorLoader(mActivity!!,
+//                    VIDEO_GALLERY_URI,
+//                    BUCKET_PROJECTION, String.format("%s AND %s", mTypeFilter, BUCKET_SELECTION),
+//                    null,
+//                    BUCKET_SORT_ORDER)
 
             MEDIA_LOADER -> {
                 CursorLoader(mActivity!!,
@@ -96,14 +105,6 @@ class VideoAndImageMediaLoader // 1 means all media type.
     private var videoBucketsCursor: Cursor? = null
     private var imageBucketsCursor: Cursor? = null
 
-    private fun checkBuckets() {
-        imageBucketsCursor?.let { images ->
-            videoBucketsCursor?.let {videos ->
-                mCallbacks?.onBucketLoadFinished(addAllMediaBucketItem(images, videos))
-            }
-        }
-    }
-
     override fun onLoadFinished(loader: Loader<Cursor?>, data: Cursor?) {
         synchronized(lock) {
             if (mCallbacks == null) return
@@ -111,13 +112,14 @@ class VideoAndImageMediaLoader // 1 means all media type.
             when (loader.id) {
                 BUCKET_LOADER -> {
                     imageBucketsCursor = data
-                    checkBuckets()
+                    mCallbacks?.onBucketLoadFinished(data)
+//                    mCallbacks?.onBucketLoadFinished(addAllMediaBucketItem(data))
                 }
 
-                VIDEO_BUCKET_LOADER -> {
-                    videoBucketsCursor = data
-                    checkBuckets()
-                }
+//                VIDEO_BUCKET_LOADER -> {
+//                    videoBucketsCursor = data
+//                    checkBuckets()
+//                }
 
                 TIME_LOADER -> mCallbacks?.onMediaLoadFinished(data)
 
@@ -167,8 +169,13 @@ class VideoAndImageMediaLoader // 1 means all media type.
         synchronized(lock) {
             imageBucketsCursor = null
             videoBucketsCursor = null
-            mActivity!!.supportLoaderManager.restartLoader(BUCKET_LOADER, null, this)
-            mActivity!!.supportLoaderManager.restartLoader(VIDEO_BUCKET_LOADER, null, this)
+            val albums = AlbumQuery.get(mActivity!!, true)
+            val args = Bundle().apply {
+                putStringArrayList(
+                        ARG_IDS, ArrayList(albums.map { it.fileId })
+                )
+            }
+            mActivity!!.supportLoaderManager.restartLoader(BUCKET_LOADER, args, this)
         }
     }
 
@@ -196,11 +203,8 @@ class VideoAndImageMediaLoader // 1 means all media type.
      * @param cursor The original data of all bucket items
      * @return The data with "All Media" item added
      */
-    private fun addAllMediaBucketItem(cursor: Cursor?, cursor2: Cursor?): Cursor? {
+    private fun addAllMediaBucketItem(cursor: Cursor?): Cursor? {
         if (cursor == null || !cursor.moveToPosition(0)) {
-            return null
-        }
-        if (cursor2 == null || !cursor2.moveToPosition(0)) {
             return null
         }
 
@@ -214,7 +218,7 @@ class VideoAndImageMediaLoader // 1 means all media type.
                 .add(label)
                 .add(data)
 
-        return MergeCursor(arrayOf(allMediaRow, cursor, cursor2))
+        return MergeCursor(arrayOf(allMediaRow, cursor))
     }
 
     companion object {
@@ -226,6 +230,8 @@ class VideoAndImageMediaLoader // 1 means all media type.
 
         const val ALL_MEDIA_BUCKET_ID: Long = 0
         private const val BUCKET_ID = MediaStore.Video.Media.BUCKET_ID
+
+        const val ARG_IDS = "ARG_IDS"
     }
 
 }

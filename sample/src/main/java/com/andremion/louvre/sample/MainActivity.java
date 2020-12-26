@@ -24,13 +24,16 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
+import com.andremion.louvre.data.AlbumQuery;
 import com.andremion.louvre.home.GalleryActivity;
 import com.andremion.louvre.util.ItemOffsetDecoration;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -68,6 +71,13 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+//                HashMap<String, AlbumQuery.Album> hm = AlbumQuery.get(MainActivity.this, false);
+//                Log.d("tag", "" + hm.size());
+//
+//                HashMap<String, AlbumQuery.Album> hm1 = AlbumQuery.get(MainActivity.this, true);
+//                Log.d("tag", "" + hm1.size());
+
                 NumberPickerDialog.show(getSupportFragmentManager(), LOUVRE_REQUEST_CODE, mSelection);
             }
         });

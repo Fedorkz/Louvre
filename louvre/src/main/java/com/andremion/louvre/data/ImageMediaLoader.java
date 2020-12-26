@@ -35,11 +35,11 @@ import org.jetbrains.annotations.NotNull;
 
 import static com.andremion.louvre.data.ImageMediaQuery.ALL_IMAGE_PROJECTION;
 import static com.andremion.louvre.data.ImageMediaQuery.BUCKET_PROJECTION;
-import static com.andremion.louvre.data.ImageMediaQuery.BUCKET_SELECTION;
 import static com.andremion.louvre.data.ImageMediaQuery.BUCKET_SORT_ORDER;
 import static com.andremion.louvre.data.ImageMediaQuery.GALLERY_URI;
 import static com.andremion.louvre.data.ImageMediaQuery.IMAGE_PROJECTION;
 import static com.andremion.louvre.data.ImageMediaQuery.MEDIA_SORT_ORDER;
+import static com.andremion.louvre.data.VideoAndImageMediaLoader.ARG_IDS;
 
 /**
  * {@link Loader} for media and bucket data
@@ -68,15 +68,16 @@ public class ImageMediaLoader implements LoaderManager.LoaderCallbacks<Cursor>, 
             return new CursorLoader(mActivity,
                     GALLERY_URI,
                     ALL_IMAGE_PROJECTION,
-                    mTypeFilter,
+                    null,
                     null,
                     MEDIA_SORT_ORDER);
         }
         if (id == BUCKET_LOADER) {
+            String selection = AlbumQuery.idsBundleToSelection(args);
             return new CursorLoader(mActivity,
                     GALLERY_URI,
                     BUCKET_PROJECTION,
-                    String.format("%s AND %s", mTypeFilter, BUCKET_SELECTION),
+                    selection,
                     null,
                     BUCKET_SORT_ORDER);
         }
@@ -93,7 +94,8 @@ public class ImageMediaLoader implements LoaderManager.LoaderCallbacks<Cursor>, 
     public final void onLoadFinished(@NonNull Loader<Cursor> loader, @Nullable Cursor data) {
         if (mCallbacks != null) {
             if (loader.getId() == BUCKET_LOADER) {
-                mCallbacks.onBucketLoadFinished(addAllMediaBucketItem(data));
+                mCallbacks.onBucketLoadFinished(data);
+//                mCallbacks.onBucketLoadFinished(addAllMediaBucketItem(data));
             } else {
                 mCallbacks.onMediaLoadFinished(data);
             }
@@ -134,7 +136,11 @@ public class ImageMediaLoader implements LoaderManager.LoaderCallbacks<Cursor>, 
     @Override
     public void loadBuckets() {
         ensureActivityAttached();
-        mActivity.getSupportLoaderManager().restartLoader(BUCKET_LOADER, null, this);
+        Bundle args = AlbumQuery.getAlbumFileIdsAsBundle(
+                mActivity, false
+        );
+
+        mActivity.getSupportLoaderManager().restartLoader(BUCKET_LOADER, args, this);
     }
 
     @Override

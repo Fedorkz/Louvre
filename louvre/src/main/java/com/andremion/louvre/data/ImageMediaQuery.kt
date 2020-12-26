@@ -55,6 +55,6 @@ internal object ImageMediaQuery {
     // Note that because there is a "(" and )" in the template, we use "1)" and "(1" to match it.
     //
     // *Hack pulled from https://android.googlesource.com/platform/packages/apps/Gallery2/+/android-4.4.2_r2/src/com/android/gallery3d/data/BucketHelper.java
-    const val BUCKET_SELECTION = "1) GROUP BY (1"
-    const val BUCKET_SORT_ORDER = "MAX(" + MediaStore.Images.Media.DATE_TAKEN + ") DESC"
+//    const val BUCKET_SELECTION = "1) GROUP BY (${MediaStore.Images.ImageColumns._ID}"
+    const val BUCKET_SORT_ORDER = "(" + MediaStore.Images.Media.DATE_MODIFIED + ") DESC"
 }

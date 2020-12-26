@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "com.andremion.louvre.sample"
         minSdkVersion project.ext.minSdkVersion
-        targetSdkVersion project.ext.targetSdkVersion
+        targetSdkVersion 29
         versionCode project.ext.versionCode
         versionName project.ext.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

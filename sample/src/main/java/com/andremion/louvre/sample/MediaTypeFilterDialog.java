@@ -87,7 +87,7 @@ public class MediaTypeFilterDialog extends DialogFragment implements DialogInter
                 .setMaxSelection(getArguments().getInt(ARG_MAX_SELECTION))
                 .setSelection((List<Uri>) getArguments().get(ARG_SELECTION))
                 .setMediaTypeFilter(parseToArray(mSelectedTypes))
-                .open();
+                .open(true);
     }
 
     @NonNull
