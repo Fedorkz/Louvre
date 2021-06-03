@@ -89,7 +89,7 @@ object AlbumQuery {
 
     @JvmStatic
     fun idsBundleToSelection(args: Bundle?): String {
-        val ids = args?.getStringArrayList(ARG_IDS) ?: emptyList()
+        val ids = args?.getStringArrayList(ARG_IDS) ?: emptyList<String>()
 
         return ids.map { _id ->
             "(${MediaStore.MediaColumns._ID} == $_id)"

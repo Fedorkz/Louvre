@@ -64,7 +64,7 @@ class VideoAndImageMediaLoader // 1 means all media type.
                     MEDIA_SORT_ORDER)
 
             BUCKET_LOADER -> {
-                val ids = args?.getStringArrayList(ARG_IDS) ?: emptyList()
+                val ids = args?.getStringArrayList(ARG_IDS) ?: emptyList<String>()
 
                 val idSelector = ids.mapNotNull { _id ->
                     "(${MediaStore.MediaColumns._ID} == $_id)"
